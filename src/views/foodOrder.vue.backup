@@ -1,0 +1,122 @@
+<template>
+    <ion-menu content-id="main-content">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Menu</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list>
+          <ion-item class="link-x">
+            <ion-label>Food</ion-label>
+          </ion-item>
+          <ion-item class="link-x">
+            <ion-label>Beverages</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
+    <ion-page id="main-content">
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-menu-button></ion-menu-button>
+          </ion-buttons>
+          <ion-title>FOOD AVAILABLE</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+            <ion-list>
+                <ion-radio-group value="">
+                    <ion-item v-for = "food in foods" :key="food">
+                        <ion-checkbox slot="start" @click ="addorder(food.id)"></ion-checkbox>
+                        <ion-label>{{ food.foodname }}</ion-label>
+                        <p></p>
+                    </ion-item>
+                    <div class="form-group">
+                        <ion-button @click ="Order">Order</ion-button>
+                    </div>
+                </ion-radio-group>
+            </ion-list>
+        </ion-content>
+    </ion-page>
+  </template>
+  
+  <script lang="ts">
+    import {
+      IonButtons,
+      IonContent,
+      IonHeader,
+      IonMenu,
+      IonMenuButton,
+      IonPage,
+      IonTitle,
+      IonCheckbox,
+      IonList,
+      IonItem,
+      IonToolbar
+    } from '@ionic/vue';
+    import { defineComponent } from 'vue';
+    import axios from 'axios';
+
+    export default defineComponent({
+      components: {
+        IonButtons,
+        IonContent,
+        IonHeader,
+        IonMenu,
+        IonMenuButton,
+        IonPage,
+        IonTitle,
+        IonToolbar
+      }, data() {
+            return {
+                orders:[],
+                foods:[],
+            }
+        },mounted(){
+            this.loadFoods();
+        },
+        methods: {
+            addorder(id:never){
+              if(this.orders.includes(id)){
+                const index = this.orders.indexOf(id);
+                this.orders.splice(index,1);
+              }else{
+                this.orders.push(id);
+              }
+              console.log(this.orders);
+              
+            },
+            loadFoods(){ 
+                axios.get('http://localhost:80/api/foods.php')
+                .then((response) => {
+                    // console.log(response.data[0].foodname);
+                    this.foods = response.data;
+                });
+            },
+            Order(){
+                axios.post('http://localhost:80/api/order.php',null,{
+                    params:{
+                        "order":this.orders,
+                    }
+                })
+                .then((response) => {
+                    // console.log(response.data[0].foodname);
+                    if(response.data[0].status==1){
+                      this.$router.push("/home");
+                      console.log("true");
+                    }else{
+                      console.log("false");
+                    }
+                });            
+            }
+        }
+    });
+  </script>
+  
+  <style>
+  .link-x{
+    cursor: pointer;
+  }
+  </style>
