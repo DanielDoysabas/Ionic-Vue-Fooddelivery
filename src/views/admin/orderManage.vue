@@ -37,13 +37,14 @@
     <ion-content class="ion-padding">
         <div class="order-list"  v-bind:class="{hidden:isActiveOrderList}">
               <ion-accordion-group >
-                      <ion-accordion v-for = "food in foods" :key="food" class="x-card" @click ="ExpandData(food)" >
+                      <ion-accordion v-for = "food in foods" :key="food" class="x-card" @click ="ExpandData(food.user_id,food.address,food.orderlist)" >
                         <ion-item slot="header" color="light">
                           <ion-label>Order: {{ food.transaction_number }}</ion-label>
                           <p>Total : ₱ {{ food.totalprice }}</p>
                         </ion-item>
                         <div class="ion-padding" slot="content">
                           <h4>USER: {{ user }}</h4>
+                          <h4 v-bind:class="{hidden:isActive}">Address: {{ food.address }}</h4>
                           <ion-list v-for = "data_purchase in activity_purchase" :key="data_purchase">
                             <ion-item>
                               <ion-label>{{ data_purchase.foodname }}</ion-label>
@@ -106,6 +107,7 @@ import { Alert } from '@ionic/core/dist/types/components/alert/alert';
                 ],
                 foods:[],
                 isActiveOrderList:false,
+                isActive:true,
                 activity_purchase:[],
                 data_activity:[],
                 user:null,
@@ -170,18 +172,22 @@ import { Alert } from '@ionic/core/dist/types/components/alert/alert';
           return toast.present();
       } ,
 
-      ExpandData(data:any){
+      ExpandData(data:any,address:any,a:any){
           if(data!=null){
-            const a = data.orderlist;
+            const id = data;
+            
+            if(address!=null){
+              this.isActive = false;
+            }
             this.activity_purchase = JSON.parse(a as string);
-            const id = this.activity_purchase[0];
+            
             axios.post('http://localhost:80/api/getUser.php',null,{
                       params:{
-                          "id":id["id"],
+                          "id":id,
                       }
             })
             .then((response) => {
-                this.user = response.data[0].username;
+                this.user = response.data[0].name;
                 this.order_userid = response.data[0].id;
             });
           }
@@ -206,6 +212,9 @@ import { Alert } from '@ionic/core/dist/types/components/alert/alert';
   </script>
   
   <style>
+  h4{
+    color:#fff !important;
+  }
   h2{
     color: #5340ff !important;
   }

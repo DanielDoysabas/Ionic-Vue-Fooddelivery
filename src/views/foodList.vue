@@ -91,13 +91,19 @@
         <div class="body">
           <ion-list>
             <ion-item>
-              <ion-select :value="pm" @ionChange="pm=$event.target.value"  interface="popover" placeholder="Select Payment Transaction" >
+              <ion-select :value="pm" @ionChange="viewchange($event.target.value)"  interface="popover" placeholder="Select Payment Transaction" >
                 <ion-select-option value=0>GCASH</ion-select-option>
                 <ion-select-option value=1>COD</ion-select-option>
                 <ion-select-option value=2>CASH</ion-select-option>
               </ion-select>
             </ion-item>
           </ion-list>
+          <div class="form-address" v-bind:class="{hidden:isActiveCOD}">
+            <div class="form-box">
+                <ion-label>Address</ion-label>
+                <ion-textarea class="form_textarea" @input="address=$event.target.value" placeholder="Address"></ion-textarea>
+            </div>
+          </div>
           <div class="semi-body">
             <ion-button @click ="Purchase">
               Purchase Order
@@ -136,6 +142,7 @@
   
   <script lang="ts">
     import {
+      IonTextarea,
       IonButtons,
       IonContent,
       IonHeader,
@@ -157,6 +164,7 @@
     export default defineComponent({
       components: {
         IonButtons,
+        IonTextarea,
         IonContent,
         IonHeader,
         IonMenu,
@@ -181,7 +189,9 @@
                 isActivePurchaseList:true,
                 isActiveTransaction:true,
                 isActiveReceipt:true,
+                isActiveCOD:true,
                 totalprice:0,
+                address:null,
                 pm:0,
                 isExist:false,
                 userid:localStorage.getItem("id")
@@ -199,6 +209,14 @@
                 return toast.present();
               }
             ,
+            viewchange(pm:any){
+                this.pm = pm;
+                if(pm==1){
+                  this.isActiveCOD = false;
+                }else{
+                  this.isActiveCOD = true;
+                }
+            },
             addorder(id:never,price:never,namefood:never){
               console.log(this.isExist);
               for (let index = 0; index < this.order1.length; ++index) {
@@ -251,7 +269,9 @@
                 Purchase(){
                   axios.post('http://localhost:80/api/order.php',null,{
                     params:{
+                      "userid":this.userid,
                       "order":this.order1,
+                      "address":this.address,
                       "paymentmode":this.pm,
                     }
                   })
@@ -261,11 +281,12 @@
                     if(response.data.status==3){
                       window.open(response.data.link);
                     }
-
+                    
                     if(response.data.status==1){
                       this.showToastMessage();
                       this.isActiveReceipt = false;
                       this.isActiveTransaction = true;
+                      this.isActiveCOD = true;
                     }
                   });     
              },
@@ -316,4 +337,10 @@
     color: #000;
   }
 
+  .form_textarea{
+    color: #5340ff !important;
+    margin-bottom: 1rem;
+    border: 1px solid #5340ff;
+    padding: 1rem !important;
+  }
   </style>
