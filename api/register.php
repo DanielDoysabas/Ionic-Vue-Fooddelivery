@@ -14,13 +14,15 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if($method == "POST") {
     
+    $name = $_REQUEST['name'];
     $myusername = $_REQUEST['username'];
     $mypassword = $_REQUEST['password']; 
     $userid = 1;
     $hash = password_hash($mypassword, PASSWORD_BCRYPT, array('cost'=>11));
 
-    $sql = "INSERT INTO users(id, username, password, user_type) VALUES(null, :username, :password, :user_type)";
+    $sql = "INSERT INTO users(id, name, username, password, user_type) VALUES(null, :name, :username, :password, :user_type)";
     $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':name', $name);
     $stmt->bindParam(':username', $myusername);
     $stmt->bindParam(':password', $hash);
     $stmt->bindParam(':user_type', $userid);

@@ -18,28 +18,30 @@ $method = $_SERVER['REQUEST_METHOD'];
 if($method == "POST") {
     $order = $_REQUEST['order'];
     $pm = $_REQUEST['paymentmode'];
+    $address = "";
+    if(isset($_REQUEST["address"])){
+        $address = $_REQUEST['address'];
+    }
     $a = 0;
     $arr = array();
     $total_price = 0;
-    $id = null;
+    $id = $_REQUEST['userid'];
     $trans_number = (rand(1000000000,9999999999));
     foreach ($order as $key => $value) {
-        // print_r($value);
         $sql = "SELECT * FROM foods WHERE id=".$value["ids"];
         $stmt = $conn->prepare($sql);
         $stmt->execute();
         $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $row[0]["id"] = $value["userid"];
-        $id = $value["userid"];
         $total_price += floatval($row[0]["price"]);
         array_push($arr, $row[0]);
     }
-    $sql = "INSERT INTO orders (orderlist, totalprice, status, paymentmode, user_id, transaction_number) VALUES(:orderlist, :totalprice, :status, :paymentmode, :user_id, :transaction_number)";
+    $sql = "INSERT INTO orders (orderlist, totalprice, address, status, paymentmode, user_id, transaction_number) VALUES(:orderlist, :totalprice, :address, :status, :paymentmode, :user_id, :transaction_number)";
     $stmt = $conn->prepare($sql);
     $data = json_encode($arr);
     $values = array(
         ":orderlist"=>$data,
         ":totalprice"=> (string)$total_price,
+        ":address"=>$address,
         ":status" => (string)$a,
         ":paymentmode" => $pm,
         ":user_id" => $id,

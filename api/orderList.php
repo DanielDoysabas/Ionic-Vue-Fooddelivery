@@ -13,7 +13,7 @@ session_start();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if($method == "GET") {
-    $sql = "SELECT * FROM orders WHERE status='0'";
+    $sql = "SELECT * FROM orders WHERE status='0' ORDER BY id DESC";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     $foods = $stmt->fetchAll(PDO::FETCH_ASSOC);
